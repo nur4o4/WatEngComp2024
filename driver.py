@@ -8,10 +8,10 @@ def indexFunc(e):
 servers = []
 max_params = [0, 0] # cores, ram
 tot_params = [0, 0] # cores, ram
-with open('./test_data/servers1.csv') as f:
+with open('./servers1.csv') as f:
 	data = csv.DictReader(f)
 	for line in data:
-		servers.append([int(line['Sever Number']), int(line['Number of Cores']), int(line['Number of Watts']), int(line['Total RAM'])])
+		servers.append([int(line['Sever Number']), int(line['Number of Cores']), int(line['Number of Watts']), int(line['Total RAM']), []])
 		if(int(line['Number of Cores']) > max_params[0]):
 			max_params[0] = int(line['Number of Cores'])
 		if(int(line['Total RAM']) > max_params[1]):
@@ -23,12 +23,11 @@ servers.sort(key=indexFunc)
 # read in all of the tasks from the task csv
 all_tasks = []
 tot_task_params = [0, 0]
-with open('./test_data/tasks1.csv') as f:
+with open('./tasks1.csv') as f:
 	data = csv.DictReader(f)
 	for line in data:
 		# choose not to run any task that exceeds the maximum resources of all of the servers
-		possible = (int(line['Number of Cores']) <= max_params[1] or int(line['RAM']) <= max_params[1])-1
-		all_tasks.append([int(line['Number of Cores']), int(line['Number of Turns']), int(line['RAM']), int(line['Complete in Turns']), possible, possible, 0])
+		all_tasks.append([int(line['Number of Cores']), int(line['Number of Turns']), int(line['RAM']), int(line['Complete in Turns']), 0, 0, 0, 0])
 		tot_task_params[0] += int(line['Number of Cores'])
 		tot_task_params[1] += int(line['RAM'])
 
@@ -49,6 +48,45 @@ for task in all_tasks:
 			task[6] = i
 			break
 		else:
-			continue
+			task[6] = -1
 
 print(all_tasks)
+
+server_data = [[]]*len(servers)
+
+counter = 0
+turn = 0
+next_task = 0
+print("loop start")
+while(counter < len(all_tasks)):
+	# decide whether or not to read next task
+	for server in servers:
+		if(all_tasks[next_task][0] <= server[1] and all_tasks[next_task][2] <= server[3] and server[4] == None):
+			all_tasks[next_task][7] = turn
+			server[4] = all_tasks[next_task]
+			next_task += 1
+			break;
+	
+	# compute task progress
+	for server in servers:
+		if(turn - server[4][7] == server[4][1]):
+			# turn complete
+	
+	turn += 1
+			
+		
+		
+	
+for i in range (0, len(all_tasks)):
+	print(i)
+	print(all_tasks[i])
+	if(all_tasks[i][6]<0):
+		remove = [0,0,0,0,0]
+		remove[0] = turn
+		remove [1] = i
+		with open("output.csv", mode='a', newline='') as file:
+			writer = csv.writer(file)
+			writer.writerow(remove)  # Append a single row
+	else:
+		continue
+	turn+=1
